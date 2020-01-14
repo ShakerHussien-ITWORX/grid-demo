@@ -5,7 +5,7 @@ const Like = props => {
   result += props.liked
     ? '" aria-hidden="true" />'
     : '-o" aria-hidden="true" />';
-    console.log(result)
+  console.log(result);
   return result;
 };
 
@@ -20,5 +20,15 @@ const Like = props => {
 //       />
 //     );
 //   };
+
+{/* <Link // to={"/editProjectData/" + element.id}
+  to={"/projectsList/editProjectData/" + element.id}
+  onClick={() =>
+    store.dispatch(
+      "setSelectedProject",
+      store.state.projectsList.filter(p => p.id === element.id)[0]
+    )
+  }
+></Link>; */}
 
 export default Like;
