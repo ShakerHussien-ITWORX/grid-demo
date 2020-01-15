@@ -1,5 +1,11 @@
 import React, { Component } from "react";
-import { AgGridReact, setQuickFilter } from "ag-grid-react";
+import { AgGridColumn, AgGridReact } from "ag-grid-react";
+
+// for community features
+import { AllCommunityModules } from "@ag-grid-community/all-modules";
+
+// for enterprise features
+//import { AllModules } from "@ag-grid-enterprise/all-modules";
 
 let data = [
   {
@@ -90,49 +96,35 @@ class Grid extends Component {
 
     this.state = {
       quickFilterText: null,
-      gridOptions: {
-        api: {},
-        columnApi: {},
 
-        columnDefs: this.createColumnDefs(),
-        defaultColDef: {
-          sortable: true,
-          filter: true,
-          resizable: true
-        },
+      rowData: data,
+      columnDefs: this.createColumnDefs(),
 
-        rowData: data,
-
-        enableSorting: true,
-        domLayout: "autoHeight"
-      }
+      enableSorting: true,
+      domLayout: "autoHeight"
     };
   }
 
   onGridReady = params => {
-    let updatedGridOptions = this.state.gridOptions;
-
-    updatedGridOptions.api = params.api;
-    updatedGridOptions.columnApi = params.columnApi;
-    updatedGridOptions.api.selectAll();
-    this.setState({ gridOptions: updatedGridOptions });
+    this.api = params.api;
+    this.columnApi = params.columnApi;
   };
 
   onQuickFilterText = event => {
     this.setState({ quickFilterText: event.target.value });
   };
 
-  onLike = e => {
-    let starClass = e.target.className;
+  onLike = event => {
+    let starClass = event.target.className;
     if (starClass === "fa fa-star-o fa-lg") {
       starClass = "fa fa-star fa-lg";
-      e.target.style.color = "#ffd700";
+      event.target.style.color = "#ffd700";
     } else {
       starClass = "fa fa-star-o fa-lg";
-      e.target.style.color = null;
+      event.target.style.color = null;
     }
 
-    e.target.className = starClass;
+    event.target.className = starClass;
   };
 
   onProjectClicked = params => {
@@ -187,7 +179,21 @@ class Grid extends Component {
       {
         headerName: "PI OVERALL STATUS",
         field: "status",
-        width: 200
+        width: 200,
+        cellRendererFramework: params => {
+          return (
+            <React.Fragment>
+              <i
+                className="fa fa-circle"
+                aria-hidden="true"
+                style={{
+                  color: params.value === "Completed" ? "#157254" : "#FF9900"
+                }}
+              ></i>
+              <span style={{ marginLeft: 5 }}>{params.value}</span>
+            </React.Fragment>
+          );
+        }
       }
     ];
   }
@@ -195,25 +201,69 @@ class Grid extends Component {
   render() {
     return (
       <React.Fragment>
-        <input
-          type="text"
-          id="quickFilter"
-          onChange={this.onQuickFilterText}
-          placeholder="Type text to filter..."
-        />
-        <div
-          className="ag-theme-blue"
-          style={{ height: "1000em", width: "1500em" }}
-        >
+        <div>
+          <span>
+            Column API:
+            <button
+              onClick={() => {
+                this.columnApi.setColumnVisible("number", false);
+              }}
+              className="btn btn-primary"
+            >
+              Hide PI NUMBER Column
+            </button>
+            <button
+              onClick={() => {
+                this.columnApi.setColumnVisible("number", true);
+              }}
+              className="btn btn-primary"
+            >
+              Show PI NUMBER Column
+            </button>
+          </span>
+        </div>
+
+        <div>
+          <label htmlFor="quickFilter">Quick Filter:&nbsp;</label>
+          <input
+            type="text"
+            id="quickFilter"
+            onChange={this.onQuickFilterText}
+            placeholder="Type text to filter..."
+          />
+        </div>
+        <div style={{ height: 1000, width: 1000 }} className="ag-theme-blue">
           <AgGridReact
-            columnDefs={this.state.gridOptions.columnDefs}
-            defaultColDef={this.state.gridOptions.defaultColDef}
-            rowData={this.state.gridOptions.rowData}
+            onGridReady={this.onGridReady}
+            // binding to simple properties
             quickFilterText={this.state.quickFilterText}
-            domLayout={this.state.gridOptions.domLayout}
+            // binding to array properties
+            rowData={this.state.rowData}
+            // register all modules (row model, csv/excel, row grouping etc)
+            modules={AllCommunityModules}
+            // setting default column properties
+            defaultColDef={{
+              resizable: true,
+              sortable: true,
+              filter: true
+            }}
+            // columnDefs={this.state.columnDefs}
+            domLayout={this.state.domLayout}
             animateRows={true}
-            gridOgtions={this.state.gridOptions}
-          ></AgGridReact>
+          >
+            {this.state.columnDefs.map((col, i) => {
+              return (
+                <AgGridColumn
+                  key={i}
+                  field={col.field}
+                  width={col.width}
+                  headerName={col.headerName}
+                  cellRendererFramework={col.cellRendererFramework}
+                  pinned
+                />
+              );
+            })}
+          </AgGridReact>
         </div>
       </React.Fragment>
     );
