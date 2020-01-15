@@ -1,12 +1,5 @@
 import React, { Component } from "react";
-import { AgGridReact } from "ag-grid-react";
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Link,
-  useParams
-} from "react-router-dom";
+import { AgGridReact, setQuickFilter } from "ag-grid-react";
 
 let data = [
   {
@@ -96,19 +89,38 @@ class Grid extends Component {
     super(props);
 
     this.state = {
-      columnDefs: this.createColumnDefs(),
+      quickFilterText: null,
+      gridOptions: {
+        api: {},
+        columnApi: {},
 
-      defaultColDef: {
-        sortable: true,
-        filter: true,
-        resizable: true
-      },
+        columnDefs: this.createColumnDefs(),
+        defaultColDef: {
+          sortable: true,
+          filter: true,
+          resizable: true
+        },
 
-      rowData: data,
+        rowData: data,
 
-      domLayout: "autoHeight"
+        enableSorting: true,
+        domLayout: "autoHeight"
+      }
     };
   }
+
+  onGridReady = params => {
+    let updatedGridOptions = this.state.gridOptions;
+
+    updatedGridOptions.api = params.api;
+    updatedGridOptions.columnApi = params.columnApi;
+    updatedGridOptions.api.selectAll();
+    this.setState({ gridOptions: updatedGridOptions });
+  };
+
+  onQuickFilterText = event => {
+    this.setState({ quickFilterText: event.target.value });
+  };
 
   onLike = e => {
     let starClass = e.target.className;
@@ -123,8 +135,8 @@ class Grid extends Component {
     e.target.className = starClass;
   };
 
-  onProjectClicked = () => {
-    console.log("Project");
+  onProjectClicked = params => {
+    console.log(`Project ${params.value}`);
   };
 
   createColumnDefs() {
@@ -145,28 +157,12 @@ class Grid extends Component {
         width: 150,
 
         cellRendererFramework: params => {
-
           return (
-            <Link
-              to={params.path+ params.id}
-              onClick={this.onProjectClicked}
-            >
+            <a href="#" onClick={() => this.onProjectClicked(params)}>
               {params.value}
-            </Link>
+            </a>
           );
-        },
-
-        // var link = document.createElement("a");
-        // link.href = "#";
-        // link.innerText = params.value;
-        // link.addEventListener("click", e => {
-        //   e.preventDefault();
-        //   console.log(params.data.id);
-        // });
-        // return link;
-
-        sortable: true,
-        filter: true
+        }
       },
       {
         headerName: "PI TITLE",
@@ -196,32 +192,27 @@ class Grid extends Component {
     ];
   }
 
-  // onFilterTextBoxChanged(e) {
-  //   console.log(e.target);
-  //   //setQuickFilter(document.getElementById("filter-text-box").value);
-  //   this.setQuickFilter(e.target.value);
-  // }
-
   render() {
     return (
       <React.Fragment>
         <input
           type="text"
-          id="filter-text-box"
-          placeholder="Filter..."
-          // onInput={this.onFilterTextBoxChanged}
+          id="quickFilter"
+          onChange={this.onQuickFilterText}
+          placeholder="Type text to filter..."
         />
         <div
           className="ag-theme-blue"
           style={{ height: "1000em", width: "1500em" }}
         >
           <AgGridReact
-            columnDefs={this.state.columnDefs}
-            defaultColDef={this.state.defaultColDef}
-            rowData={this.state.rowData}
-            domLayout={this.state.domLayout}
+            columnDefs={this.state.gridOptions.columnDefs}
+            defaultColDef={this.state.gridOptions.defaultColDef}
+            rowData={this.state.gridOptions.rowData}
+            quickFilterText={this.state.quickFilterText}
+            domLayout={this.state.gridOptions.domLayout}
             animateRows={true}
-            // quickFilterText={this.onFilterTextBoxChanged}
+            gridOgtions={this.state.gridOptions}
           ></AgGridReact>
         </div>
       </React.Fragment>
