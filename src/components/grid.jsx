@@ -137,7 +137,8 @@ class Grid extends Component {
         headerName: "",
         field: "star",
         width: 50,
-
+        sortable: false,
+        filter: false,
         cellRendererFramework: () => {
           return <i onClick={this.onLike} className="fa fa-star-o fa-lg" />;
         }
@@ -197,80 +198,82 @@ class Grid extends Component {
     ];
   }
 
-  handleColumnAPI = (event) => {
+  handleColumnAPI = event => {
     //console.log(event.target.id,event.target.checked);
     this.columnApi.setColumnVisible(event.target.id, !event.target.checked);
   };
+
+  onBtnExport = () => {
+    this.api.exportDataAsCsv();
+  };
+
   render() {
     return (
       <React.Fragment>
         <div>
+          Column API:
           <div>
-            Column API:
-            
-            <div >
-              <label htmlFor="star">Hide Star&nbsp;</label>
-              <input
-                type="checkbox"
-                id="star"
-                onChange={this.handleColumnAPI}
-                style={{ marginRight: 5 }}
-              />
-            </div>
-            <div >
-              <label htmlFor="number">Hide PI NUMBER&nbsp;</label>
-              <input
-                type="checkbox"
-                id="number"
-                onChange={this.handleColumnAPI}
-                style={{ marginRight: 5 }}
-              />
-            </div>
-            <div >
-              <label htmlFor="title">Hide PI TITLE&nbsp;</label>
-              <input
-                type="checkbox"
-                id="title"
-                onChange={this.handleColumnAPI}
-                style={{ marginRight: 5 }}
-              />
-            </div>
-            <div >
-              <label htmlFor="description">Hide DISCRIPTION&nbsp;</label>
-              <input
-                type="checkbox"
-                id="description"
-                onChange={this.handleColumnAPI}
-                style={{ marginRight: 5 }}
-              />
-            </div>
-            <div >
-              <label htmlFor="indication">Hide INDICATION&nbsp;</label>
-              <input
-                type="checkbox"
-                id="indication"
-                onChange={this.handleColumnAPI}
-                style={{ marginRight: 5 }}
-              />
-            </div>
-            <div >
-              <label htmlFor="state">Hide PROJRCT STATE&nbsp;</label>
-              <input
-                type="checkbox"
-                id="state"
-                onChange={this.handleColumnAPI}
-                style={{ marginRight: 5 }}
-              />
-            </div>
-            <div >
-              <label htmlFor="status">Hide PI OVERALL STATUS&nbsp;</label>
-              <input
-                type="checkbox"
-                id="status"
-                onChange={this.handleColumnAPI}
-                style={{ marginRight: 5 }}
-              />
-            </div>
+            <label htmlFor="star">Hide Star&nbsp;</label>
+            <input
+              type="checkbox"
+              id="star"
+              onChange={this.handleColumnAPI}
+              style={{ marginRight: 5 }}
+            />
+          </div>
+          <div>
+            <label htmlFor="number">Hide PI NUMBER&nbsp;</label>
+            <input
+              type="checkbox"
+              id="number"
+              onChange={this.handleColumnAPI}
+              style={{ marginRight: 5 }}
+            />
+          </div>
+          <div>
+            <label htmlFor="title">Hide PI TITLE&nbsp;</label>
+            <input
+              type="checkbox"
+              id="title"
+              onChange={this.handleColumnAPI}
+              style={{ marginRight: 5 }}
+            />
+          </div>
+          <div>
+            <label htmlFor="description">Hide DISCRIPTION&nbsp;</label>
+            <input
+              type="checkbox"
+              id="description"
+              onChange={this.handleColumnAPI}
+              style={{ marginRight: 5 }}
+            />
+          </div>
+          <div>
+            <label htmlFor="indication">Hide INDICATION&nbsp;</label>
+            <input
+              type="checkbox"
+              id="indication"
+              onChange={this.handleColumnAPI}
+              style={{ marginRight: 5 }}
+            />
+          </div>
+          <div>
+            <label htmlFor="state">Hide PROJRCT STATE&nbsp;</label>
+            <input
+              type="checkbox"
+              id="state"
+              onChange={this.handleColumnAPI}
+              style={{ marginRight: 5 }}
+            />
+          </div>
+          <div>
+            <label htmlFor="status">Hide PI OVERALL STATUS&nbsp;</label>
+            <input
+              type="checkbox"
+              id="status"
+              onChange={this.handleColumnAPI}
+              style={{ marginRight: 5 }}
+            />
           </div>
         </div>
 
@@ -283,6 +286,11 @@ class Grid extends Component {
             placeholder="Type text to filter..."
           />
         </div>
+
+        <div>
+          <button onClick={this.onBtnExport}>Download file as CSV</button>
+        </div>
+
         <div style={{ height: 1000, width: 1000 }} className="ag-theme-blue">
           <AgGridReact
             onGridReady={this.onGridReady}
@@ -301,6 +309,7 @@ class Grid extends Component {
             // columnDefs={this.state.columnDefs}
             domLayout={this.state.domLayout}
             animateRows={true}
+            pagination={true}
           >
             {this.state.columnDefs.map((col, i) => {
               return (
@@ -309,6 +318,10 @@ class Grid extends Component {
                   field={col.field}
                   width={col.width}
                   headerName={col.headerName}
+                  sortable={
+                    col.hasOwnProperty("sortable") ? col.sortable : true
+                  }
+                  filter={col.hasOwnProperty("filter") ? col.filter : true}
                   cellRendererFramework={col.cellRendererFramework}
                   pinned
                 />
